@@ -1,14 +1,16 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public static bool GameOver { get; private set; }
+    public static bool GameOver { get; private set; } = true;
     public static bool DoubleSpeed { get; private set; }
 
     [SerializeField] private ParticleSystem explosionParticle;
     [SerializeField] private ParticleSystem dirtParticle;
     [SerializeField] private AudioClip jumpSound;
     [SerializeField] private AudioClip crashSound;
+    [SerializeField] private Transform startingPoint;
 
     private const string Ground = "Ground";
     private const string Obstacle = "Obstacle";
@@ -16,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private const float JumpForce = 700;
     private const float DoubleJumpForce = 400;
     private const float GravityModifier = 1.5f;
+    private const float LerpSpeed = 5;
     private static readonly int JumpTrigger = Animator.StringToHash("Jump_trig");
     private static readonly int DeathBool = Animator.StringToHash("Death_b");
     private static readonly int DeathTypeInt = Animator.StringToHash("DeathType_int");
@@ -26,6 +29,11 @@ public class PlayerController : MonoBehaviour
     private AudioSource _playerAudio;
     private bool _isOnGround = true;
     private bool _doubleJumpUsed = false;
+
+    public void PlayIntro()
+    {
+        StartCoroutine(PlayIntroCoroutine());
+    }
 
     private void Awake()
     {
@@ -85,5 +93,27 @@ public class PlayerController : MonoBehaviour
             _playerAnimator.SetBool(DeathBool, true);
             _playerAnimator.SetInteger(DeathTypeInt, 1);
         }
+    }
+
+    private IEnumerator PlayIntroCoroutine()
+    {
+        GameOver = true;
+        Vector3 startPos = transform.position;
+        Vector3 endPos = startingPoint.position;
+        float journeyLength = Vector3.Distance(startPos, endPos);
+        float startTime = Time.time;
+        float distanceCovered = (Time.time - startTime) * LerpSpeed;
+        float fractionOfJourney = distanceCovered / journeyLength;
+        _playerAnimator.SetFloat(SpeedMultiplier, 0.5f);
+        while (fractionOfJourney < 1)
+        {
+            distanceCovered = (Time.time - startTime) * LerpSpeed;
+            fractionOfJourney = distanceCovered / journeyLength;
+            transform.position = Vector3.Lerp(startPos, endPos, fractionOfJourney);
+            yield return null;
+        }
+
+        _playerAnimator.SetFloat(SpeedMultiplier, 1.0f);
+        GameOver = false;
     }
 }
