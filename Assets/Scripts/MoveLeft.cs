@@ -9,7 +9,7 @@ public class MoveLeft : MonoBehaviour
     private void Update()
     {
         if (PlayerController.GameOver) return;
-        transform.Translate(Time.deltaTime * Speed * Vector3.left);
+        transform.Translate((PlayerController.DoubleSpeed ? 2 : 1) * Speed * Time.deltaTime * Vector3.left);
         if (transform.position.x < LeftBound && gameObject.CompareTag(Obstacle))
         {
             Destroy(gameObject);

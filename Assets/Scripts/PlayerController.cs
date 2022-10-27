@@ -3,6 +3,7 @@
 public class PlayerController : MonoBehaviour
 {
     public static bool GameOver { get; private set; }
+    public static bool DoubleSpeed { get; private set; }
 
     [SerializeField] private ParticleSystem explosionParticle;
     [SerializeField] private ParticleSystem dirtParticle;
@@ -13,17 +14,18 @@ public class PlayerController : MonoBehaviour
     private const string Obstacle = "Obstacle";
     private const string RunningJump = "Running_Jump";
     private const float JumpForce = 700;
-    public float doubleJumpForce = 400;
+    private const float DoubleJumpForce = 400;
     private const float GravityModifier = 1.5f;
     private static readonly int JumpTrigger = Animator.StringToHash("Jump_trig");
     private static readonly int DeathBool = Animator.StringToHash("Death_b");
     private static readonly int DeathTypeInt = Animator.StringToHash("DeathType_int");
+    private static readonly int SpeedMultiplier = Animator.StringToHash("Speed_Multiplier");
 
     private Rigidbody _playerRigidbody;
     private Animator _playerAnimator;
     private AudioSource _playerAudio;
     private bool _isOnGround = true;
-    public bool doubleJumpUsed = false;
+    private bool _doubleJumpUsed = false;
 
     private void Awake()
     {
@@ -43,14 +45,25 @@ public class PlayerController : MonoBehaviour
             _playerRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
             _isOnGround = false;
             _playerAnimator.SetTrigger(JumpTrigger);
-            doubleJumpUsed = false;
+            _doubleJumpUsed = false;
         }
-        else if (Input.GetKeyDown(KeyCode.Space) && !_isOnGround && !doubleJumpUsed)
+        else if (Input.GetKeyDown(KeyCode.Space) && !_isOnGround && !_doubleJumpUsed)
         {
-            doubleJumpUsed = true;
-            _playerRigidbody.AddForce(Vector3.up * doubleJumpForce, ForceMode.Impulse);
+            _doubleJumpUsed = true;
+            _playerRigidbody.AddForce(Vector3.up * DoubleJumpForce, ForceMode.Impulse);
             _playerAnimator.Play(RunningJump, 3, 0f);
             _playerAudio.PlayOneShot(jumpSound, 1.0f);
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && _isOnGround)
+        {
+            DoubleSpeed = true;
+            _playerAnimator.SetFloat(SpeedMultiplier, 2.0f);
+        }
+        else if (DoubleSpeed)
+        {
+            DoubleSpeed = false;
+            _playerAnimator.SetFloat(SpeedMultiplier, 1.0f);
         }
     }
 
