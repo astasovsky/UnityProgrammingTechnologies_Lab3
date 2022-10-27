@@ -12,7 +12,7 @@ namespace Challenge_3.Scripts
         [SerializeField] private AudioClip explodeSound;
         [SerializeField] private AudioClip groundSound;
 
-        private const float FloatForce = 50;
+        private const float FloatForce = 500;
         private const float GravityModifier = 1.5f;
         private const string Bomb = "Bomb";
         private const string Money = "Money";
@@ -35,7 +35,7 @@ namespace Challenge_3.Scripts
         private void Update()
         {
             // While space is pressed and player is low enough, float up
-            if (Input.GetKey(KeyCode.Space) && !gameOver && transform.position.y < 13)
+            if (Input.GetKeyDown(KeyCode.Space) && !gameOver && transform.position.y < 13)
             {
                 _playerRigidbody.AddForce(Vector3.up * FloatForce);
             }
@@ -63,7 +63,7 @@ namespace Challenge_3.Scripts
             else if (other.gameObject.CompareTag(Ground))
             {
                 _playerAudioSource.PlayOneShot(groundSound);
-                _playerRigidbody.AddForce(Vector3.up * FloatForce * 15);
+                _playerRigidbody.AddForce(Vector3.up * FloatForce);
             }
         }
     }
