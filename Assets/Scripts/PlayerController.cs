@@ -4,6 +4,11 @@ public class PlayerController : MonoBehaviour
 {
     public static bool GameOver { get; private set; }
 
+    [SerializeField] private ParticleSystem explosionParticle;
+    [SerializeField] private ParticleSystem dirtParticle;
+    [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioClip crashSound;
+
     private const string Ground = "Ground";
     private const string Obstacle = "Obstacle";
     private const float JumpForce = 700;
@@ -12,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody _playerRigidbody;
     private Animator _playerAnimator;
+    private AudioSource playerAudio;
     private bool _isOnGround = true;
     private static readonly int DeathBool = Animator.StringToHash("Death_b");
     private static readonly int DeathTypeInt = Animator.StringToHash("DeathType_int");
@@ -20,6 +26,7 @@ public class PlayerController : MonoBehaviour
     {
         _playerRigidbody = GetComponent<Rigidbody>();
         _playerAnimator = GetComponent<Animator>();
+        playerAudio = GetComponent<AudioSource>();
         Physics.gravity *= GravityModifier;
     }
 
@@ -27,6 +34,8 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && _isOnGround && !GameOver)
         {
+            dirtParticle.Stop();
+            playerAudio.PlayOneShot(jumpSound);
             _playerRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
             _isOnGround = false;
             _playerAnimator.SetTrigger(JumpTrigger);
@@ -35,12 +44,17 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (GameOver) return;
         if (collision.gameObject.CompareTag(Ground))
         {
+            dirtParticle.Play();
             _isOnGround = true;
         }
         else if (collision.gameObject.CompareTag(Obstacle))
         {
+            dirtParticle.Stop();
+            playerAudio.PlayOneShot(crashSound);
+            explosionParticle.Play();
             GameOver = true;
             Debug.Log("Game Over!");
             _playerAnimator.SetBool(DeathBool, true);
