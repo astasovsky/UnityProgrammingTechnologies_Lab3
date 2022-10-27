@@ -2,6 +2,10 @@
 
 public class PlayerController : MonoBehaviour
 {
+    public static bool GameOver { get; private set; }
+
+    private const string Ground = "Ground";
+    private const string Obstacle = "Obstacle";
     private const float JumpForce = 10;
     private const float GravityModifier = 1;
 
@@ -25,6 +29,14 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        _isOnGround = true;
+        if (collision.gameObject.CompareTag(Ground))
+        {
+            _isOnGround = true;
+        }
+        else if (collision.gameObject.CompareTag(Obstacle))
+        {
+            GameOver = true;
+            Debug.Log("Game Over!");
+        }
     }
 }
