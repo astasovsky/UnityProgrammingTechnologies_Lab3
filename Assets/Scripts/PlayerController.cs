@@ -11,34 +11,46 @@ public class PlayerController : MonoBehaviour
 
     private const string Ground = "Ground";
     private const string Obstacle = "Obstacle";
+    private const string RunningJump = "Running_Jump";
     private const float JumpForce = 700;
+    public float doubleJumpForce = 400;
     private const float GravityModifier = 1.5f;
     private static readonly int JumpTrigger = Animator.StringToHash("Jump_trig");
+    private static readonly int DeathBool = Animator.StringToHash("Death_b");
+    private static readonly int DeathTypeInt = Animator.StringToHash("DeathType_int");
 
     private Rigidbody _playerRigidbody;
     private Animator _playerAnimator;
-    private AudioSource playerAudio;
+    private AudioSource _playerAudio;
     private bool _isOnGround = true;
-    private static readonly int DeathBool = Animator.StringToHash("Death_b");
-    private static readonly int DeathTypeInt = Animator.StringToHash("DeathType_int");
+    public bool doubleJumpUsed = false;
 
     private void Awake()
     {
         _playerRigidbody = GetComponent<Rigidbody>();
         _playerAnimator = GetComponent<Animator>();
-        playerAudio = GetComponent<AudioSource>();
+        _playerAudio = GetComponent<AudioSource>();
         Physics.gravity *= GravityModifier;
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && _isOnGround && !GameOver)
+        if (GameOver) return;
+        if (Input.GetKeyDown(KeyCode.Space) && _isOnGround)
         {
             dirtParticle.Stop();
-            playerAudio.PlayOneShot(jumpSound);
+            _playerAudio.PlayOneShot(jumpSound);
             _playerRigidbody.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
             _isOnGround = false;
             _playerAnimator.SetTrigger(JumpTrigger);
+            doubleJumpUsed = false;
+        }
+        else if (Input.GetKeyDown(KeyCode.Space) && !_isOnGround && !doubleJumpUsed)
+        {
+            doubleJumpUsed = true;
+            _playerRigidbody.AddForce(Vector3.up * doubleJumpForce, ForceMode.Impulse);
+            _playerAnimator.Play(RunningJump, 3, 0f);
+            _playerAudio.PlayOneShot(jumpSound, 1.0f);
         }
     }
 
@@ -53,7 +65,7 @@ public class PlayerController : MonoBehaviour
         else if (collision.gameObject.CompareTag(Obstacle))
         {
             dirtParticle.Stop();
-            playerAudio.PlayOneShot(crashSound);
+            _playerAudio.PlayOneShot(crashSound);
             explosionParticle.Play();
             GameOver = true;
             Debug.Log("Game Over!");
