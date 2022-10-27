@@ -1,33 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class MoveLeftX : MonoBehaviour
+namespace Challenge_3.Scripts
 {
-    public float speed;
-    private PlayerControllerX playerControllerScript;
-    private float leftBound = -10;
-
-    // Start is called before the first frame update
-    void Start()
+    public class MoveLeftX : MonoBehaviour
     {
-        playerControllerScript = GameObject.Find("Player").GetComponent<PlayerControllerX>();
-    }
+        [SerializeField] private float speed;
 
-    // Update is called once per frame
-    void Update()
-    {
-        // If game is not over, move to the left
-        if (playerControllerScript.gameOver)
+        private const float LeftBound = -10;
+        private const string Player = "Player";
+        private const string Background = "Background";
+
+        private PlayerControllerX _playerControllerScript;
+
+        // Start is called before the first frame update
+        private void Start()
         {
-            transform.Translate(Vector3.left * speed * Time.deltaTime, Space.World);
+            _playerControllerScript = GameObject.Find(Player).GetComponent<PlayerControllerX>();
         }
 
-        // If object goes off screen that is NOT the background, destroy it
-        if (transform.position.x < leftBound && !gameObject.CompareTag("Background"))
+        // Update is called once per frame
+        private void Update()
         {
-            Destroy(gameObject);
-        }
+            // If game is not over, move to the left
+            if (!_playerControllerScript.gameOver)
+            {
+                transform.Translate(speed * Time.deltaTime * Vector3.left, Space.World);
+            }
 
+            // If object goes off screen that is NOT the background, destroy it
+            if (transform.position.x < LeftBound && !gameObject.CompareTag(Background))
+            {
+                Destroy(gameObject);
+            }
+        }
     }
 }
